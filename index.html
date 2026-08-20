@@ -11,8 +11,9 @@
         .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 15px; margin-top: 25px; }
         .friend-card { background: #161b22; border: 2px solid #30363d; border-radius: 12px; padding: 25px 10px; cursor: pointer; font-size: 1.1rem; font-weight: bold; color: #58a6ff; transition: 0.3s; }
         .friend-card:hover { border-color: #58a6ff; transform: translateY(-5px); }
-        .input-box, select, textarea { width: 100%; max-width: 320px; padding: 12px; margin: 10px 0; border-radius: 6px; border: 1px solid #30363d; background-color: #161b22; color: #58a6ff; font-size: 1rem; text-align: center; }
-        textarea { text-align: left; height: 100px; resize: vertical; }
+        .input-box, select, textarea { width: 100%; max-width: 380px; padding: 12px; margin: 10px 0; border-radius: 6px; border: 1px solid #30363d; background-color: #161b22; color: #58a6ff; font-size: 1rem; }
+        .input-box, select { text-align: center; }
+        textarea { text-align: left; height: 90px; resize: vertical; }
         .btn { padding: 12px 25px; background-color: #238636; color: white; border: none; border-radius: 6px; font-size: 1rem; cursor: pointer; font-weight: bold; margin: 5px; }
         .btn-delete { background-color: #da3633; }
         .btn-delete:hover { background-color: #f85149; }
@@ -28,51 +29,40 @@
         .progress-bar-container { width: 250px; height: 20px; background-color: #222; border: 1px solid #00ff00; border-radius: 10px; margin: 15px auto; overflow: hidden; }
         .progress-bar { width: 0%; height: 100%; background-color: #00ff00; }
 
-        /* Gallery & Media display */
+        /* Gallery & Photo Display */
         .memory-card { background: #161b22; border: 1px solid #30363d; border-radius: 16px; padding: 30px; }
-        .media-gallery { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin-bottom: 20px; }
-        .gallery-photo { width: 140px; height: 140px; border-radius: 12px; object-fit: cover; border: 2px solid #58a6ff; animation: floatPhoto 3s ease-in-out infinite; }
-        video { width: 100%; max-width: 400px; border-radius: 12px; margin: 15px 0; border: 1px solid #30363d; }
-        audio { width: 100%; max-width: 350px; margin: 15px 0; }
-        
-        @keyframes floatPhoto {
-            0% { transform: translateY(0px); }
-            50% { transform: translateY(-8px); }
-            100% { transform: translateY(0px); }
-        }
+        .media-gallery { display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; margin-top: 20px; }
+        .photo-item { display: flex; flex-direction: column; align-items: center; background: #0d1117; padding: 10px; border-radius: 12px; border: 1px solid #30363d; }
+        .gallery-photo { width: 160px; height: 160px; border-radius: 8px; object-fit: cover; border: 2px solid #58a6ff; }
+        .btn-photo-delete { margin-top: 10px; padding: 6px 14px; background-color: #da3633; color: white; border: none; border-radius: 6px; font-size: 0.85rem; font-weight: bold; cursor: pointer; }
+        .btn-photo-delete:hover { background-color: #f85149; }
+        .memory-text-display { background: #0d1117; border: 1px solid #30363d; border-radius: 8px; padding: 15px; margin-bottom: 20px; color: #58a6ff; font-size: 1.1rem; line-height: 1.5; text-align: left; display: none; }
 
         .admin-box { background: #161b22; padding: 25px; border-radius: 12px; border: 1px solid #30363d; text-align: left; max-width: 500px; margin: 0 auto; }
     </style>
-
-    <!-- Firebase SDK Setup -->
+<!-- Firebase SDK Setup -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
         import { getFirestore, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
-        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
-// ከምስሉ ላይ የተወሰደው ያንተ Config
+
         const firebaseConfig = {
-            apiKey: "AIzaSyDb6yR4PsCoOwKSB8Sx_iDkvfSXgK5eQ9M",
-            authDomain: "myfrands-adef4.firebaseapp.com",
-            projectId: "myfrands-adef4",
-            storageBucket: "myfrands-adef4.firebasestorage.app",
-            messagingSenderId: "922158607025",
-            appId: "1:922158607025:web:d80328d22649e56c5fd090",
-            measurementId: "G-ZWE7DD14BM"
+            apiKey: "AIzaSyCu9KnmGTByV8tgvBN1n6TCn6609pcQPIo",
+            authDomain: "frend-58bf3.firebaseapp.com",
+            projectId: "frend-58bf3",
+            storageBucket: "frend-58bf3.firebasestorage.app",
+            messagingSenderId: "49103792839",
+            appId: "1:49103792839:web:973a2479f079368e4a6ce2",
+            measurementId: "G-KKL3LJS5FG"
         };
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const storage = getStorage(app);
 
         window.db = db;
-        window.storage = storage;
         window.doc = doc;
         window.setDoc = setDoc;
         window.getDoc = getDoc;
         window.deleteDoc = deleteDoc;
-        window.ref = ref;
-        window.uploadBytes = uploadBytes;
-        window.getDownloadURL = getDownloadURL;
     </script>
 </head>
 <body>
@@ -81,7 +71,7 @@
         <!-- Step 1: Select Friend -->
         <div id="step-select">
             <h1 style="margin-bottom: 10px;">30 Days Memory Vault</h1>
-            <p style="color: #8b949e;">Select your name to access your secret memorial card.</p>
+            <p style="color: #8b949e;">Select your name to access your secret memorial photos.</p>
             <div class="card-grid">
                 <div class="friend-card" onclick="openPasswordPage('Amanuel')">Amanuel</div>
                 <div class="friend-card" onclick="openPasswordPage('Amir')">Amir</div>
@@ -105,12 +95,10 @@
         <div id="step-memory" style="display: none;">
             <div class="memory-card">
                 <h2 id="friend-name" style="color: #58a6ff; margin-bottom: 15px;"></h2>
-                
+                <div id="user-note-display" class="memory-text-display"></div>
                 <div id="gallery-container" class="media-gallery"></div>
-                <div id="video-container"></div>
-                <div id="audio-container"></div>
-
-                <p id="friend-message" style="font-size: 1.1rem; line-height: 1.6; color: #8b949e; margin: 20px 0;"></p>
+                <p id="status-text" style="color: #8b949e; margin-top: 15px;"></p>
+                <br>
                 <button class="btn btn-back" onclick="restart()">Close Vault</button>
             </div>
         </div>
@@ -121,7 +109,7 @@
                 <h2 style="color: #58a6ff; margin-bottom: 15px; text-align: center;">Control Panel</h2>
                 
                 <label style="color: #8b949e;">Select Friend:</label><br>
-                <select id="admin-target">
+                <select id="admin-target" onchange="loadAdminData()">
                     <option value="Amir">Amir</option>
                     <option value="Absh">Absh</option>
                     <option value="Alazar">Alazar</option>
@@ -129,27 +117,22 @@
                 </select>
 
                 <br><br>
-                <label style="color: #8b949e;">Upload Photos (Multiple):</label><br>
+                <label style="color: #8b949e;">Custom Text Message / Note:</label><br>
+                <textarea id="admin-text" placeholder="Write a secret note or message for this friend..."></textarea>
+
+                <br><br>
+                <label style="color: #8b949e;">Upload Photos (Multiple Allowed):</label><br>
                 <input type="file" id="admin-photos" accept="image/*" multiple style="margin: 10px 0; color: #8b949e;">
-
-                <br><br>
-                <label style="color: #8b949e;">Upload Video:</label><br>
-                <input type="file" id="admin-video" accept="video/*" style="margin: 10px 0; color: #8b949e;">
 <br><br>
-                <label style="color: #8b949e;">Upload Voice Record:</label><br>
-                <input type="file" id="admin-audio" accept="audio/*" style="margin: 10px 0; color: #8b949e;">
-
-                <br><br>
-                <label style="color: #8b949e;">Edit Memorial Message:</label><br>
-                <textarea id="admin-msg" class="input-box" placeholder="Write message..."></textarea>
-
-                <br><br>
                 <div style="text-align: center;">
-                    <button class="btn" onclick="saveAdminDataFirebase()">Upload / Save</button>
-                    <button class="btn btn-delete" onclick="deleteFriendDataFirebase()">Delete Data</button>
+                    <button class="btn" onclick="saveDataFirebase()">Save Note & Photos</button>
                     <button class="btn btn-back" onclick="restart()">Exit</button>
                 </div>
                 <p id="admin-status" style="color: #2ea043; text-align: center; margin-top: 10px;"></p>
+
+                <hr style="border: 0.5px solid #30363d; margin: 20px 0;">
+                <h3 style="color: #58a6ff; text-align: center; margin-bottom: 10px;">Manage Uploaded Photos</h3>
+                <div id="admin-gallery" class="media-gallery"></div>
             </div>
         </div>
     </div>
@@ -199,6 +182,7 @@
                 document.getElementById('step-password').style.display = 'none';
                 if (selectedUser === 'Amanuel') {
                     document.getElementById('step-admin').style.display = 'block';
+                    loadAdminData();
                 } else {
                     startHackAnimation();
                 }
@@ -207,105 +191,134 @@
             }
         }
 
-        /* Firebase Upload Function */
-        async function saveAdminDataFirebase() {
+        function fileToBase64(file) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = () => resolve(reader.result);
+                reader.onerror = error => reject(error);
+            });
+        }
+
+        /* Save Text Note & Photos to Firestore Database */
+        async function saveDataFirebase() {
             const target = document.getElementById('admin-target').value;
-            const message = document.getElementById('admin-msg').value;
             const photosInput = document.getElementById('admin-photos').files;
-            const videoInput = document.getElementById('admin-video').files[0];
-            const audioInput = document.getElementById('admin-audio').files[0];
+            const noteText = document.getElementById('admin-text').value;
             const status = document.getElementById('admin-status');
 
             status.style.color = '#58a6ff';
-            status.innerText = 'Uploading files to Firebase... Please wait!';
-
-            let photoURLs = [];
-            let videoURL = "";
-            let audioURL = "";
+            status.innerText = 'Saving data... Please wait!';
 
             try {
                 const docSnap = await window.getDoc(window.doc(window.db, "vault", target));
-                let oldData = docSnap.exists() ? docSnap.data() : {};
-photoURLs = oldData.photos || [];
-                videoURL = oldData.video || "";
-                audioURL = oldData.audio || "";
-
-                if (photosInput.length > 0) {
-                    photoURLs = [];
+                let photoDataArray = [];
+                
+                if (docSnap.exists() && docSnap.data().photos) {
+                    photoDataArray = docSnap.data().photos;
+                }
+if (photosInput.length > 0) {
                     for (let file of photosInput) {
-                        const storageRef = window.ref(window.storage, 'memories/' + target + '/photos/' + file.name);
-                        await window.uploadBytes(storageRef, file);
-                        const url = await window.getDownloadURL(storageRef);
-                        photoURLs.push(url);
+                        const base64Photo = await fileToBase64(file);
+                        photoDataArray.push(base64Photo);
                     }
                 }
 
-                if (videoInput) {
-                    const videoRef = window.ref(window.storage, 'memories/' + target + '/video/' + videoInput.name);
-                    await window.uploadBytes(videoRef, videoInput);
-                    videoURL = await window.getDownloadURL(videoRef);
-                }
-
-                if (audioInput) {
-                    const audioRef = window.ref(window.storage, 'memories/' + target + '/audio/' + audioInput.name);
-                    await window.uploadBytes(audioRef, audioInput);
-                    audioURL = await window.getDownloadURL(audioRef);
-                }
-
                 await window.setDoc(window.doc(window.db, "vault", target), {
-                    message: message  `oldData.message  ""`,
-                    photos: photoURLs,
-                    video: videoURL,
-                    audio: audioURL
-                }, { merge: true });
+                    note: noteText,
+                    photos: photoDataArray
+                });
 
                 status.style.color = '#2ea043';
-                status.innerText = 'Saved successfully for ' + target + '!';
+                status.innerText = 'Updated successfully!';
+                document.getElementById('admin-photos').value = '';
+                loadAdminData();
             } catch (e) {
+                console.error(e);
                 status.style.color = '#f85149';
-                status.innerText = 'Upload failed: ' + e.message;
+                status.innerText = 'Save failed: ' + e.message;
             }
         }
 
-        /* Firebase Delete Function */
-        async function deleteFriendDataFirebase() {
+        /* Load Photos and Text in Admin Panel */
+        async function loadAdminData() {
+            const target = document.getElementById('admin-target').value;
+            const adminGallery = document.getElementById('admin-gallery');
+            const noteInput = document.getElementById('admin-text');
+            adminGallery.innerHTML = '<p style="color: #8b949e;">Loading data...</p>';
+
+            try {
+                const docSnap = await window.getDoc(window.doc(window.db, "vault", target));
+                adminGallery.innerHTML = '';
+
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    noteInput.value = data.note || '';
+
+                    if (data.photos && data.photos.length > 0) {
+                        data.photos.forEach((photoUrl, index) => {
+                            adminGallery.innerHTML += '<div class="photo-item">' +
+                                '<img src="' + photoUrl + '" class="gallery-photo">' +
+                                '<button class="btn-photo-delete" onclick="deleteSinglePhoto(' + index + ')">Delete</button>' +
+                                '</div>';
+                        });
+                    } else {
+                        adminGallery.innerHTML = '<p style="color: #8b949e;">No photos found for this user.</p>';
+                    }
+                } else {
+                    noteInput.value = '';
+                    adminGallery.innerHTML = '<p style="color: #8b949e;">No data found for this user.</p>';
+                }
+            } catch (e) {
+                console.error(e);
+                adminGallery.innerHTML = '<p style="color: #f85149;">Error loading data.</p>';
+            }
+        }
+
+        /* Delete Single Selected Photo */
+        async function deleteSinglePhoto(index) {
             const target = document.getElementById('admin-target').value;
             const status = document.getElementById('admin-status');
 
-            if (!confirm('Are you sure you want to delete all data for ' + target + '?')) {
+            if (!confirm('Are you sure you want to delete this photo?')) {
                 return;
             }
 
             status.style.color = '#f85149';
-            status.innerText = 'Deleting data for ' + target + '...';
+            status.innerText = 'Deleting photo...';
 
             try {
-                await window.deleteDoc(window.doc(window.db, "vault", target));
+                const docSnap = await window.getDoc(window.doc(window.db, "vault", target));
+                if (docSnap.exists() && docSnap.data().photos) {
+                    let photos = docSnap.data().photos;
+                    let existingNote = docSnap.data().note || '';
+                    photos.splice(index, 1);
 
-                document.getElementById('admin-msg').value = '';
-                document.getElementById('admin-photos').value = '';
-                document.getElementById('admin-video').value = '';
-                document.getElementById('admin-audio').value = '';
+                    await window.setDoc(window.doc(window.db, "vault", target), {
+                        note: existingNote,
+                        photos: photos
+                    });
 
-                status.style.color = '#2ea043';
-                status.innerText = 'All data deleted successfully for ' + target + '!';
+                    status.style.color = '#2ea043';
+                    status.innerText = 'Photo deleted successfully!';
+                    loadAdminData();
+                }
             } catch (e) {
+                console.error(e);
                 status.style.color = '#f85149';
                 status.innerText = 'Delete failed: ' + e.message;
             }
         }
-
-        async function showFinalCard() {
+async function showFinalCard() {
             document.getElementById('friend-name').innerText = selectedUser;
             const gallery = document.getElementById('gallery-container');
-            const videoBox = document.getElementById('video-container');
-            const audioBox = document.getElementById('audio-container');
-            const msgBox = document.getElementById('friend-message');
+            const noteDisplay = document.getElementById('user-note-display');
+            const statusText = document.getElementById('status-text');
 
             gallery.innerHTML = '';
-            videoBox.innerHTML = '';
-            audioBox.innerHTML = '';
-            msgBox.innerText = 'Loading memories...';
+            noteDisplay.style.display = 'none';
+            noteDisplay.innerText = '';
+            statusText.innerText = 'Loading memories...';
 
             document.getElementById('step-memory').style.display = 'block';
 
@@ -313,23 +326,26 @@ photoURLs = oldData.photos || [];
                 const docSnap = await window.getDoc(window.doc(window.db, "vault", selectedUser));
                 if (docSnap.exists()) {
                     const data = docSnap.data();
-                    msgBox.innerText = data.message || '';
-if (data.photos && data.photos.length > 0) {
+
+                    if (data.note && data.note.trim() !== '') {
+                        noteDisplay.innerText = data.note;
+                        noteDisplay.style.display = 'block';
+                    }
+
+                    if (data.photos && data.photos.length > 0) {
+                        statusText.innerText = '';
                         data.photos.forEach(url => {
                             gallery.innerHTML += '<img src="' + url + '" class="gallery-photo">';
                         });
-                    }
-                    if (data.video) {
-                        videoBox.innerHTML = '<video controls src="' + data.video + '"></video>';
-                    }
-                    if (data.audio) {
-                        audioBox.innerHTML = '<audio controls src="' + data.audio + '"></audio>';
+                    } else {
+                        statusText.innerText = 'No photos uploaded yet!';
                     }
                 } else {
-                    msgBox.innerText = "No memories uploaded yet!";
+                    statusText.innerText = 'No contents found!';
                 }
             } catch (e) {
-                msgBox.innerText = "Error loading data!";
+                console.error(e);
+                statusText.innerText = 'Error loading data!';
             }
         }
 
@@ -337,6 +353,7 @@ if (data.photos && data.photos.length > 0) {
             document.getElementById('step-memory').style.display = 'none';
             document.getElementById('step-admin').style.display = 'none';
             document.getElementById('step-select').style.display = 'block';
+            document.getElementById('admin-status').innerText = '';
         }
 
         /* Hacker Animation Effect */
@@ -390,8 +407,7 @@ if (data.photos && data.photos.length > 0) {
             const fontSize = 14;
             const columns = canvas.width / fontSize;
             const drops = Array(Math.floor(columns)).fill(1);
-
-            function draw() {
+function draw() {
                 ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
                 ctx.fillRect(0, 0, canvas.width, canvas.height);
                 ctx.fillStyle = '#0f0';
