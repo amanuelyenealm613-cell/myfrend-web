@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>30 Days Memory Vault</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Segoe UI', sans-serif; }
+        body { background-color: #0d1117; color: #c9d1d9; min-height: 100vh; display: flex; justify-content: center; align-items: center; }
+        .container { width: 90%; max-width: 800px; padding: 20px; text-align: center; }
+        .card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 15px; margin-top: 25px; }
+        .friend-card { background: #161b22; border: 2px solid #30363d; border-radius: 12px; padding: 25px 10px; cursor: pointer; font-size: 1.1rem; font-weight: bold; color: #58a6ff; transition: 0.3s; }
+        .friend-card:hover { border-color: #58a6ff; transform: translateY(-5px); }
+        .input-box, select, textarea { width: 100%; max-width: 320px; padding: 12px; margin: 10px 0; border-radius: 6px; border: 1px solid #30363d; background-color: #161b22; color: #58a6ff; font-size: 1rem; text-align: center; }
+        textarea { text-align: left; height: 100px; resize: vertical; }
+        .btn { padding: 12px 25px; background-color: #238636; color: white; border: none; border-radius: 6px; font-size: 1rem; cursor: pointer; font-weight: bold; margin: 5px; }
+        .btn-delete { background-color: #da3633; }
+        .btn-delete:hover { background-color: #f85149; }
+        .btn-back { background-color: #21262d; }
+        .error-text { color: #f85149; margin-top: 10px; }
+
+        /* Hacker Overlay */
+        #hacker-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background-color: black; z-index: 100; display: none; flex-direction: column; justify-content: center; align-items: center; }
+        canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; }
+        .hack-overlay { position: relative; z-index: 2; text-align: center; background: rgba(0, 0, 0, 0.85); padding: 30px; border-radius: 10px; border: 1px solid #00ff00; box-shadow: 0 0 15px #00ff00; }
+        .hack-text { color: #00ff00; font-size: 1.5rem; margin-bottom: 15px; font-family: monospace; }
+        .alert-text { color: #ff0000; font-size: 2rem; font-weight: bold; display: none; }
+        .progress-bar-container { width: 250px; height: 20px; background-color: #222; border: 1px solid #00ff00; border-radius: 10px; margin: 15px auto; overflow: hidden; }
+        .progress-bar { width: 0%; height: 100%; background-color: #00ff00; }
+
+        /* Gallery & Media display */
+        .memory-card { background: #161b22; border: 1px solid #30363d; border-radius: 16px; padding: 30px; }
+        .media-gallery { display: flex; flex-wrap: wrap; gap: 15px; justify-content: center; margin-bottom: 20px; }
+        .gallery-photo { width: 140px; height: 140px; border-radius: 12px; object-fit: cover; border: 2px solid #58a6ff; animation: floatPhoto 3s ease-in-out infinite; }
+        video { width: 100%; max-width: 400px; border-radius: 12px; margin: 15px 0; border: 1px solid #30363d; }
+        audio { width: 100%; max-width: 350px; margin: 15px 0; }
+        
+        @keyframes floatPhoto {
+            0% { transform: translateY(0px); }
+            50% { transform: translateY(-8px); }
+            100% { transform: translateY(0px); }
+        }
+
+        .admin-box { background: #161b22; padding: 25px; border-radius: 12px; border: 1px solid #30363d; text-align: left; max-width: 500px; margin: 0 auto; }
+    </style>
+
+    <!-- Firebase SDK Setup -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getFirestore, doc, setDoc, getDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js";
+        import { getStorage, ref, uploadBytes, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-storage.js";
+// ከምስሉ ላይ የተወሰደው ያንተ Config
+        const firebaseConfig = {
+            apiKey: "AIzaSyDb6yR4PsCoOwKSB8Sx_iDkvfSXgK5eQ9M",
+            authDomain: "myfrands-adef4.firebaseapp.com",
+            projectId: "myfrands-adef4",
+            storageBucket: "myfrands-adef4.firebasestorage.app",
+            messagingSenderId: "922158607025",
+            appId: "1:922158607025:web:d80328d22649e56c5fd090",
+            measurementId: "G-ZWE7DD14BM"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const db = getFirestore(app);
+        const storage = getStorage(app);
+
+        window.db = db;
+        window.storage = storage;
+        window.doc = doc;
+        window.setDoc = setDoc;
+        window.getDoc = getDoc;
+        window.deleteDoc = deleteDoc;
+        window.ref = ref;
+        window.uploadBytes = uploadBytes;
+        window.getDownloadURL = getDownloadURL;
+    </script>
+</head>
+<body>
+
+    <div class="container">
+        <!-- Step 1: Select Friend -->
+        <div id="step-select">
+            <h1 style="margin-bottom: 10px;">30 Days Memory Vault</h1>
+            <p style="color: #8b949e;">Select your name to access your secret memorial card.</p>
+            <div class="card-grid">
+                <div class="friend-card" onclick="openPasswordPage('Amanuel')">Amanuel</div>
+                <div class="friend-card" onclick="openPasswordPage('Amir')">Amir</div>
+                <div class="friend-card" onclick="openPasswordPage('Absh')">Absh</div>
+                <div class="friend-card" onclick="openPasswordPage('Alazar')">Alazar</div>
+                <div class="friend-card" onclick="openPasswordPage('Anan')">Anan</div>
+            </div>
+        </div>
+
+        <!-- Step 2: Password Input -->
+        <div id="step-password" style="display: none;">
+            <h2 id="password-title">Enter Passcode</h2>
+            <input type="password" id="passcode-input" class="input-box" placeholder="Enter Code">
+            <br>
+            <button class="btn" onclick="checkPassword()">Unlock Memory</button>
+            <button class="btn btn-back" onclick="goBack()">Back</button>
+            <p id="error-msg" class="error-text"></p>
+        </div>
+
+        <!-- Step 3: Final Card Display -->
+        <div id="step-memory" style="display: none;">
+            <div class="memory-card">
+                <h2 id="friend-name" style="color: #58a6ff; margin-bottom: 15px;"></h2>
+                
+                <div id="gallery-container" class="media-gallery"></div>
+                <div id="video-container"></div>
+                <div id="audio-container"></div>
+
+                <p id="friend-message" style="font-size: 1.1rem; line-height: 1.6; color: #8b949e; margin: 20px 0;"></p>
+                <button class="btn btn-back" onclick="restart()">Close Vault</button>
+            </div>
+        </div>
+
+        <!-- Step 4: Admin Panel -->
+        <div id="step-admin" style="display: none;">
+            <div class="admin-box">
+                <h2 style="color: #58a6ff; margin-bottom: 15px; text-align: center;">Control Panel</h2>
+                
+                <label style="color: #8b949e;">Select Friend:</label><br>
+                <select id="admin-target">
+                    <option value="Amir">Amir</option>
+                    <option value="Absh">Absh</option>
+                    <option value="Alazar">Alazar</option>
+                    <option value="Anan">Anan</option>
+                </select>
+
+                <br><br>
+                <label style="color: #8b949e;">Upload Photos (Multiple):</label><br>
+                <input type="file" id="admin-photos" accept="image/*" multiple style="margin: 10px 0; color: #8b949e;">
+
+                <br><br>
+                <label style="color: #8b949e;">Upload Video:</label><br>
+                <input type="file" id="admin-video" accept="video/*" style="margin: 10px 0; color: #8b949e;">
+<br><br>
+                <label style="color: #8b949e;">Upload Voice Record:</label><br>
+                <input type="file" id="admin-audio" accept="audio/*" style="margin: 10px 0; color: #8b949e;">
+
+                <br><br>
+                <label style="color: #8b949e;">Edit Memorial Message:</label><br>
+                <textarea id="admin-msg" class="input-box" placeholder="Write message..."></textarea>
+
+                <br><br>
+                <div style="text-align: center;">
+                    <button class="btn" onclick="saveAdminDataFirebase()">Upload / Save</button>
+                    <button class="btn btn-delete" onclick="deleteFriendDataFirebase()">Delete Data</button>
+                    <button class="btn btn-back" onclick="restart()">Exit</button>
+                </div>
+                <p id="admin-status" style="color: #2ea043; text-align: center; margin-top: 10px;"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Hacker Screen -->
+    <div id="hacker-screen">
+        <canvas id="matrix"></canvas>
+        <div class="hack-overlay">
+            <div id="hack-status" class="hack-text">Scanning phone data...</div>
+            <div class="progress-bar-container" id="bar-box">
+                <div id="progress-bar" class="progress-bar"></div>
+            </div>
+            <div id="percent-text" class="hack-text" style="font-size: 1rem;">0%</div>
+            <div id="alert-box" class="alert-text">YOUR PHONE HAS BEEN HACKED!</div>
+        </div>
+    </div>
+
+    <script>
+        const passcodes = {
+            'Amanuel': '2116',
+            'Amir': '3257',
+            'Absh': '3896',
+            'Alazar': '9813',
+            'Anan': '2879'
+        };
+
+        let selectedUser = '';
+
+        function openPasswordPage(name) {
+            selectedUser = name;
+            document.getElementById('step-select').style.display = 'none';
+            document.getElementById('step-password').style.display = 'block';
+            document.getElementById('password-title').innerText = 'Hello ' + name + ', Enter Passcode';
+            document.getElementById('passcode-input').value = '';
+            document.getElementById('error-msg').innerText = '';
+        }
+
+        function goBack() {
+            document.getElementById('step-password').style.display = 'none';
+            document.getElementById('step-select').style.display = 'block';
+        }
+
+        function checkPassword() {
+            const inputCode = document.getElementById('passcode-input').value;
+
+            if (inputCode === passcodes[selectedUser]) {
+                document.getElementById('step-password').style.display = 'none';
+                if (selectedUser === 'Amanuel') {
+                    document.getElementById('step-admin').style.display = 'block';
+                } else {
+                    startHackAnimation();
+                }
+            } else {
+                document.getElementById('error-msg').innerText = 'Incorrect passcode!';
+            }
+        }
+
+        /* Firebase Upload Function */
+        async function saveAdminDataFirebase() {
+            const target = document.getElementById('admin-target').value;
+            const message = document.getElementById('admin-msg').value;
+            const photosInput = document.getElementById('admin-photos').files;
+            const videoInput = document.getElementById('admin-video').files[0];
+            const audioInput = document.getElementById('admin-audio').files[0];
+            const status = document.getElementById('admin-status');
+
+            status.style.color = '#58a6ff';
+            status.innerText = 'Uploading files to Firebase... Please wait!';
+
+            let photoURLs = [];
+            let videoURL = "";
+            let audioURL = "";
+
+            try {
+                const docSnap = await window.getDoc(window.doc(window.db, "vault", target));
+                let oldData = docSnap.exists() ? docSnap.data() : {};
+photoURLs = oldData.photos || [];
+                videoURL = oldData.video || "";
+                audioURL = oldData.audio || "";
+
+                if (photosInput.length > 0) {
+                    photoURLs = [];
+                    for (let file of photosInput) {
+                        const storageRef = window.ref(window.storage, 'memories/' + target + '/photos/' + file.name);
+                        await window.uploadBytes(storageRef, file);
+                        const url = await window.getDownloadURL(storageRef);
+                        photoURLs.push(url);
+                    }
+                }
+
+                if (videoInput) {
+                    const videoRef = window.ref(window.storage, 'memories/' + target + '/video/' + videoInput.name);
+                    await window.uploadBytes(videoRef, videoInput);
+                    videoURL = await window.getDownloadURL(videoRef);
+                }
+
+                if (audioInput) {
+                    const audioRef = window.ref(window.storage, 'memories/' + target + '/audio/' + audioInput.name);
+                    await window.uploadBytes(audioRef, audioInput);
+                    audioURL = await window.getDownloadURL(audioRef);
+                }
+
+                await window.setDoc(window.doc(window.db, "vault", target), {
+                    message: message  `oldData.message  ""`,
+                    photos: photoURLs,
+                    video: videoURL,
+                    audio: audioURL
+                }, { merge: true });
+
+                status.style.color = '#2ea043';
+                status.innerText = 'Saved successfully for ' + target + '!';
+            } catch (e) {
+                status.style.color = '#f85149';
+                status.innerText = 'Upload failed: ' + e.message;
+            }
+        }
+
+        /* Firebase Delete Function */
+        async function deleteFriendDataFirebase() {
+            const target = document.getElementById('admin-target').value;
+            const status = document.getElementById('admin-status');
+
+            if (!confirm('Are you sure you want to delete all data for ' + target + '?')) {
+                return;
+            }
+
+            status.style.color = '#f85149';
+            status.innerText = 'Deleting data for ' + target + '...';
+
+            try {
+                await window.deleteDoc(window.doc(window.db, "vault", target));
+
+                document.getElementById('admin-msg').value = '';
+                document.getElementById('admin-photos').value = '';
+                document.getElementById('admin-video').value = '';
+                document.getElementById('admin-audio').value = '';
+
+                status.style.color = '#2ea043';
+                status.innerText = 'All data deleted successfully for ' + target + '!';
+            } catch (e) {
+                status.style.color = '#f85149';
+                status.innerText = 'Delete failed: ' + e.message;
+            }
+        }
+
+        async function showFinalCard() {
+            document.getElementById('friend-name').innerText = selectedUser;
+            const gallery = document.getElementById('gallery-container');
+            const videoBox = document.getElementById('video-container');
+            const audioBox = document.getElementById('audio-container');
+            const msgBox = document.getElementById('friend-message');
+
+            gallery.innerHTML = '';
+            videoBox.innerHTML = '';
+            audioBox.innerHTML = '';
+            msgBox.innerText = 'Loading memories...';
+
+            document.getElementById('step-memory').style.display = 'block';
+
+            try {
+                const docSnap = await window.getDoc(window.doc(window.db, "vault", selectedUser));
+                if (docSnap.exists()) {
+                    const data = docSnap.data();
+                    msgBox.innerText = data.message || '';
+if (data.photos && data.photos.length > 0) {
+                        data.photos.forEach(url => {
+                            gallery.innerHTML += '<img src="' + url + '" class="gallery-photo">';
+                        });
+                    }
+                    if (data.video) {
+                        videoBox.innerHTML = '<video controls src="' + data.video + '"></video>';
+                    }
+                    if (data.audio) {
+                        audioBox.innerHTML = '<audio controls src="' + data.audio + '"></audio>';
+                    }
+                } else {
+                    msgBox.innerText = "No memories uploaded yet!";
+                }
+            } catch (e) {
+                msgBox.innerText = "Error loading data!";
+            }
+        }
+
+        function restart() {
+            document.getElementById('step-memory').style.display = 'none';
+            document.getElementById('step-admin').style.display = 'none';
+            document.getElementById('step-select').style.display = 'block';
+        }
+
+        /* Hacker Animation Effect */
+        function startHackAnimation() {
+            const screen = document.getElementById('hacker-screen');
+            const pBar = document.getElementById('progress-bar');
+            const pText = document.getElementById('percent-text');
+            const alertBox = document.getElementById('alert-box');
+            const barBox = document.getElementById('bar-box');
+            const statusText = document.getElementById('hack-status');
+
+            screen.style.display = 'flex';
+            alertBox.style.display = 'none';
+            barBox.style.display = 'block';
+            pText.style.display = 'block';
+            statusText.innerText = "Scanning phone data...";
+
+            runMatrixEffect();
+
+            let val = 0;
+            const timer = setInterval(() => {
+                val += 2;
+                pBar.style.width = val + '%';
+                pText.innerText = val + '%';
+
+                if (val >= 100) {
+                    clearInterval(timer);
+                    statusText.innerText = "ACCESS GRANTED";
+                    barBox.style.display = 'none';
+                    pText.style.display = 'none';
+                    alertBox.style.display = 'block';
+
+                    setTimeout(() => {
+                        stopMatrixEffect();
+                        screen.style.display = 'none';
+                        showFinalCard();
+                    }, 3500);
+                }
+            }, 50);
+        }
+
+        /* Matrix Animation */
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+        let matrixInterval;
+
+        function runMatrixEffect() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+            const letters = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+            const fontSize = 14;
+            const columns = canvas.width / fontSize;
+            const drops = Array(Math.floor(columns)).fill(1);
+
+            function draw() {
+                ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = '#0f0';
+                ctx.font = fontSize + 'px monospace';
+
+                for (let i = 0; i < drops.length; i++) {
+                    const text = letters.charAt(Math.floor(Math.random() * letters.length));
+                    ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+                    if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                        drops[i] = 0;
+                    }
+                    drops[i]++;
+                }
+            }
+            matrixInterval = setInterval(draw, 33);
+        }
+
+        function stopMatrixEffect() {
+            clearInterval(matrixInterval);
+        }
+    </script>
+</body>
+</html>
